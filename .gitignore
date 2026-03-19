@@ -1,0 +1,27 @@
+# --- Ambientes Python ---
+venv/
+.venv/
+ENV/
+
+# --- Credenciais / configuração ---
+.env
+.env.*
+!.env.exemple
+
+.kaggle/
+
+# --- Dados ---
+data/
+
+# --- Python bytecode / caches ---
+__pycache__/
+*.py[cod]
+
+# --- Jupyter / notebooks (ajuste se quiser versionar notebooks) ---
+notebooks/
+.ipynb_checkpoints/
+
+# --- IDEs / editor ---
+.vscode/
+.idea/
+.DS_Store
