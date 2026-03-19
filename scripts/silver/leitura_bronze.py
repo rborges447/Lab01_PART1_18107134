@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pandas as pd
 
-from scripts.config import load_settings
+from scripts.utils.config import load_settings
 
 
 def ler_data_raw_csv() -> pd.DataFrame:

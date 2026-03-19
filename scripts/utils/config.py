@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 ENV_PATH_DEFAULT = REPO_ROOT / ".env"
 
 

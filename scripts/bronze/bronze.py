@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from scripts.config import load_settings
+from scripts.utils.config import load_settings
 
 from scripts.bronze.extract import descompactar_zip
-from scripts.bronze.filesystem import criar_pasta_se_nao_existe
+from scripts.utils.filesystem import criar_pasta_se_nao_existe
 from scripts.bronze.kaggle_client import baixar_dataset
 
 
