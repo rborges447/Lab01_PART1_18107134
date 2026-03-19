@@ -1,5 +1,13 @@
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
+
 from scripts.silver.leitura_bronze import ler_data_raw_csv
+from scripts.utils.config import load_settings
+from  scripts.utils.filesystem import criar_pasta_se_nao_existe
 
 def _calcular_relatorio(df: pd.DataFrame) -> dict:
     total_linhas, total_colunas = df.shape
@@ -31,6 +39,71 @@ def _calcular_relatorio(df: pd.DataFrame) -> dict:
         "stats":          stats,
     }
 
+def _df_to_md(df: pd.DataFrame) -> str:
+    """Converte um DataFrame em tabela Markdown."""
+    header    = "| " + " | ".join(str(c) for c in df.columns) + " |"
+    separator = "| " + " | ".join(["---"] * len(df.columns)) + " |"
+    rows      = [
+        "| " + " | ".join(str(v) for v in row) + " |"
+        for row in df.itertuples(index=False)
+    ]
+    return "\n".join([header, separator] + rows)
+
+
+def _salvar_markdown(relatorio: dict, nome_dataset: str) -> str:
+    settings = load_settings()
+
+    docs_dir = Path(settings.docs_dir)
+    criar_pasta_se_nao_existe(docs_dir)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    nome_arquivo = f"data_quality_report_{nome_dataset}.md"
+    caminho_md = docs_dir / nome_arquivo
+
+    linhas = []
+
+    linhas += [
+        f"# Data Quality Report — {nome_dataset}",
+        f"\n> Gerado automaticamente em {timestamp}",
+        "\n---\n",
+    ]
+
+    linhas += [
+        "## 1. Visão Geral\n",
+        "| | |",
+        "|---|---|",
+        f"| Total de linhas  | {relatorio['total_linhas']:,} |",
+        f"| Total de colunas | {relatorio['total_colunas']} |",
+        "\n---\n",
+    ]
+
+    linhas += ["## 2. Tipos de Colunas\n"]
+    linhas += [_df_to_md(relatorio["tipos"])]
+    linhas += ["\n---\n"]
+
+    linhas += ["## 3. Contagem de Nulos\n"]
+    linhas += [_df_to_md(relatorio["nulos"])]
+    linhas += ["\n---\n"]
+
+    linhas += ["## 4. Estatísticas Descritivas (colunas numéricas)\n"]
+    if relatorio["stats"].empty:
+        linhas += ["> Nenhuma coluna numérica encontrada.\n"]
+    else:
+        linhas += [_df_to_md(relatorio["stats"])]
+    linhas += ["\n---\n"]
+
+    linhas += [
+        "## 5. Gráficos\n",
+        "> *(a ser preenchido pelo script Silver)*\n",
+    ]
+
+    caminho_md.write_text("\n".join(linhas), encoding="utf-8")
+
+    print(f"[INFO] Relatório salvo em: {caminho_md}")
+    return str(caminho_md)
+
+
 if __name__ == "__main__":
     df = ler_data_raw_csv()
-    print(_calcular_relatorio(df))
+    relatorio = _calcular_relatorio(df)
+    _salvar_markdown(relatorio, "spotify-12m-songs")

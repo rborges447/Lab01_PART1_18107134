@@ -12,7 +12,8 @@ ENV_PATH_DEFAULT = REPO_ROOT / ".env"
 @dataclass(frozen=True)
 class Settings:
     dataset: str
-    raw_dir: str  # caminho absoluto resolvido
+    raw_dir: str
+    docs_dir: str  # caminho absoluto resolvido
 
 
 def _parse_env_file(path: Path) -> Dict[str, str]:
@@ -33,7 +34,6 @@ def _parse_env_file(path: Path) -> Dict[str, str]:
         key = key.strip()
         value = value.strip()
 
-        # remove aspas simples/duplas comuns em .env
         if (value.startswith('"') and value.endswith('"')) or (
             value.startswith("'") and value.endswith("'")
         ):
@@ -42,6 +42,13 @@ def _parse_env_file(path: Path) -> Dict[str, str]:
         out[key] = value
 
     return out
+
+
+def _resolve_path(path_value: str) -> Path:
+    path = Path(path_value)
+    if not path.is_absolute():
+        path = (REPO_ROOT / path).resolve()
+    return path
 
 
 def load_settings(env_path: Optional[Path] = None) -> Settings:
@@ -54,11 +61,13 @@ def load_settings(env_path: Optional[Path] = None) -> Settings:
         raise KeyError("Chave RAW_DIR não encontrada no .env.")
 
     dataset = env["DATASET"]
-    raw_dir_value = env["RAW_DIR"]
+    raw_dir = _resolve_path(env["RAW_DIR"])
 
-    raw_path = Path(raw_dir_value)
-    if not raw_path.is_absolute():
-        raw_path = (REPO_ROOT / raw_path).resolve()
+    docs_dir_value = env.get("DOCS_DIR", "docs")
+    docs_dir = _resolve_path(docs_dir_value)
 
-    return Settings(dataset=dataset, raw_dir=str(raw_path))
-
+    return Settings(
+        dataset=dataset,
+        raw_dir=str(raw_dir),
+        docs_dir=str(docs_dir),
+    )
