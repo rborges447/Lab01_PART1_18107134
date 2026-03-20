@@ -115,8 +115,11 @@ def _salvar_markdown(relatorio: dict, nome_dataset: str) -> str:
     print(f"[INFO] Relatório salvo em: {caminho_md}")
     return str(caminho_md)
 
+def  gerar_relatorio(df: pd.DataFrame):
+    relatorio = _calcular_relatorio(df)
+    _salvar_markdown(relatorio, "spotify-12m-songs")
+
 
 if __name__ == "__main__":
     df = ler_data_raw_csv()
-    relatorio = _calcular_relatorio(df)
-    _salvar_markdown(relatorio, "spotify-12m-songs")
+    gerar_relatorio(df)
