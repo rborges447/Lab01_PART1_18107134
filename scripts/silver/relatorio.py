@@ -40,15 +40,28 @@ def _calcular_relatorio(df: pd.DataFrame) -> dict:
     }
 
 def _df_to_md(df: pd.DataFrame) -> str:
-    """Converte um DataFrame em tabela Markdown."""
-    header    = "| " + " | ".join(str(c) for c in df.columns) + " |"
-    separator = "| " + " | ".join(["---"] * len(df.columns)) + " |"
-    rows      = [
-        "| " + " | ".join(str(v) for v in row) + " |"
-        for row in df.itertuples(index=False)
-    ]
-    return "\n".join([header, separator] + rows)
+    """
+    Converte um DataFrame em tabela Markdown com colunas alinhadas.
+    Cada célula é preenchida com espaços até o comprimento máximo da coluna,
+    garantindo alinhamento visual no editor.
+    """
+    df_str = df.astype(str)
 
+    # Largura máxima de cada coluna: maior entre o header e os valores
+    col_widths = {
+        col: max(len(col), df_str[col].str.len().max())
+        for col in df_str.columns
+    }
+
+    def formatar_linha(valores: list) -> str:
+        celulas = [str(v).ljust(col_widths[col]) for v, col in zip(valores, df_str.columns)]
+        return "| " + " | ".join(celulas) + " |"
+
+    header    = formatar_linha(df_str.columns.tolist())
+    separator = "| " + " | ".join(["-" * col_widths[col] for col in df_str.columns]) + " |"
+    rows      = [formatar_linha(row) for row in df_str.itertuples(index=False)]
+
+    return "\n".join([header, separator] + rows)
 
 def _salvar_markdown(relatorio: dict, nome_dataset: str) -> str:
     settings = load_settings()
