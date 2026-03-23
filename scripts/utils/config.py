@@ -13,7 +13,8 @@ ENV_PATH_DEFAULT = REPO_ROOT / ".env"
 class Settings:
     dataset: str
     raw_dir: str
-    docs_dir: str  # caminho absoluto resolvido
+    docs_dir: str
+    silver_dir: str
 
 
 def _parse_env_file(path: Path) -> Dict[str, str]:
@@ -59,10 +60,12 @@ def load_settings(env_path: Optional[Path] = None) -> Settings:
         raise KeyError("Chave DATASET não encontrada no .env.")
     if "RAW_DIR" not in env:
         raise KeyError("Chave RAW_DIR não encontrada no .env.")
+    if "SILVER_DIR" not in env:
+        raise KeyError("Chave SILVER_DIR não encontrada no .env.")
 
     dataset = env["DATASET"]
     raw_dir = _resolve_path(env["RAW_DIR"])
-
+    silver_dir = _resolve_path(env["SILVER_DIR"])
     docs_dir_value = env.get("DOCS_DIR", "docs")
     docs_dir = _resolve_path(docs_dir_value)
 
@@ -70,4 +73,5 @@ def load_settings(env_path: Optional[Path] = None) -> Settings:
         dataset=dataset,
         raw_dir=str(raw_dir),
         docs_dir=str(docs_dir),
+        silver_dir=str(silver_dir),
     )
