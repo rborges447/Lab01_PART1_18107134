@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from scripts.silver.graficos_silver import gerar_graficos_e_relatorio
 from scripts.silver.leitura_bronze import ler_data_raw_csv
 from scripts.silver.tratamento import tratar_dados
 from scripts.utils.config import load_settings
@@ -17,8 +18,10 @@ def executar_silver() -> Path:
     silver_dir = Path(settings.silver_dir)
     criar_pasta_se_nao_existe(silver_dir)
 
-    output_path = silver_dir / "tracks_features_silver.parquet"
+    output_path = silver_dir / settings.silver_parquet_name
     df_tratado.to_parquet(output_path, index=False)
+
+    gerar_graficos_e_relatorio(df_tratado, settings)
 
     print(f"[DONE] Silver concluído. Arquivo salvo em: {output_path}")
     print(f"[INFO] Shape final: {df_tratado.shape}")
